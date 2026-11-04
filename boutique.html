@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Boutiques fournisseurs | FCS</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080808;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #111;
+    padding: 20px;
+    border-bottom: 1px solid #d4af37;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+header h1 {
+    color: #d4af37;
+}
+
+header a {
+    color: #d4af37;
+    text-decoration: none;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+h2 {
+    color: #d4af37;
+    text-align: center;
+}
+
+.intro {
+    text-align: center;
+    color: #bbb;
+    margin-bottom: 35px;
+}
+
+.boutiques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.carte {
+    background: #151515;
+    border: 1px solid #8f7523;
+    border-radius: 12px;
+    padding: 22px;
+}
+
+.carte h3 {
+    color: #d4af37;
+}
+
+.carte p {
+    color: #ccc;
+    line-height: 1.6;
+}
+
+.badge {
+    display: inline-block;
+    background: #d4af37;
+    color: #080808;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#message {
+    text-align: center;
+    color: #d4af37;
+    margin: 30px 0;
+}
+
+footer {
+    text-align: center;
+    color: #999;
+    padding: 25px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>FCS</h1>
+    <nav>
+        <a href="index.html">Accueil</a> |
+        <a href="espace.html">Mon espace</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <h2>🏪 Boutiques fournisseurs</h2>
+
+    <p class="intro">
+        Découvrez les entreprises et fournisseurs présents sur FCS.
+    </p>
+
+    <div id="message">Chargement des boutiques...</div>
+
+    <div class="boutiques" id="listeBoutiques"></div>
+
+</div>
+
+<footer>
+    FOFANA COMMERCE SERVICE — Le commerce sans frontières
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script type="module">
+import { supabase } from "./supabase.js";
+
+const supabaseClient = supabase;
+
+async function chargerBoutiques() {
+
+    const message = document.getElementById("message");
+    const liste = document.getElementById("listeBoutiques");
+
+    const { data, error } = await supabaseClient
+        .from("supplier_stores")
+        .select("user_id, store_name, description, city, country")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        message.textContent = "Erreur Supabase : " + error.message;
+        console.error(error);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        message.textContent = "Aucune boutique publique pour le moment.";
+        return;
+    }
+
+    message.textContent = "";
+
+    data.forEach(boutique => {
+
+        const carte = document.createElement("div");
+        carte.className = "carte";
+
+        const titre = document.createElement("h3");
+        titre.textContent = boutique.store_name;
+
+        const description = document.createElement("p");
+        description.textContent =
+            boutique.description || "Bienvenue dans notre boutique.";
+
+        const localisation = document.createElement("p");
+        localisation.textContent =
+            "📍 " + boutique.city + ", " + boutique.country;
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = "Boutique fournisseur";
+        const visiter = document.createElement("button");
+
+visiter.textContent = "Visiter la boutique";
+
+visiter.style.cssText = `
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    background:#d4af37;
+    color:#080808;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+`;
+
+visiter.addEventListener("click", function () {
+
+    window.location.href =
+        "boutique-detail.html?id=" +
+        encodeURIComponent(boutique.user_id);
+});
+       carte.append(titre, description, localisation, badge, visiter);
+        liste.appendChild(carte);
+    });
+}
+
+chargerBoutiques();
+</script>
+
+</body>
+</html>

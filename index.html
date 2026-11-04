@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FCS | FOFANA COMMERCE SERVICE</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        header {
+            background: #111;
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            color: #d4af37;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .slogan {
+            font-size: 12px;
+            color: #ddd;
+            margin-top: 5px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 8px;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            color: #d4af37;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #111, #333);
+            color: white;
+            text-align: center;
+            padding: 75px 20px;
+        }
+
+        .hero h1 {
+            font-size: 38px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 span {
+            color: #d4af37;
+        }
+
+        .hero p {
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .search-box {
+            max-width: 650px;
+            margin: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 0;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #d4af37;
+            color: #111;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #f0cf62;
+        }
+
+        section {
+            padding: 45px 7%;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 18px;
+        }
+
+        .category {
+            background: white;
+            padding: 25px 15px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 3px 12px #00000010;
+            border-bottom: 3px solid #d4af37;
+            cursor: pointer;
+        }
+
+        .category .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .category:hover {
+            transform: translateY(-3px);
+        }
+
+        .listings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .listing {
+            background: white;
+            padding: 22px;
+            border-radius: 8px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        .listing h3 {
+            margin: 12px 0;
+        }
+
+        .listing p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            color: #997700;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #fff1bd;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .publish {
+            background: #fff;
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+
+        footer {
+            background: #111;
+            color: white;
+            padding: 28px 15px;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        footer span {
+            color: #d4af37;
+        }
+
+        @media (max-width: 650px) {
+            header {
+                justify-content: center;
+                text-align: center;
+            }
+
+            nav {
+                line-height: 2.2;
+            }
+
+            .hero h1 {
+                font-size: 29px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+        }
+        .hero-buttons {
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 18px;
+margin-top: 25px;
+flex-wrap: wrap;
+}
+
+.hero-buttons .button {
+display: inline-block;
+padding: 15px 25px;
+background: #d4af37;
+color: #080808;
+text-decoration: none;
+font-weight: bold;
+border-radius: 8px;
+transition: 0.3s;
+}
+
+.hero-buttons .button:hover {
+background: #f0cf55;
+transform: translateY(-3px);
+}
+
+@media (max-width: 600px) {
+.hero-buttons {
+flex-direction: column;
+}
+
+.hero-buttons .button {
+    width: 85%;
+    text-align: center;
+}
+
+}
+.categories {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 22px;
+margin: 30px auto;
+}
+
+.category {
+background: #151515;
+border: 1px solid #d4af37;
+border-radius: 14px;
+padding: 28px 15px;
+text-align: center;
+cursor: pointer;
+transition: 0.3s;
+}
+
+.category:hover {
+background: #252015;
+transform: translateY(-6px);
+box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+}
+
+.category .icon {
+font-size: 38px;
+margin-bottom: 12px;
+}
+
+.category h3 {
+color: #d4af37;
+margin: 0;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <header>
+    <div class="brand">
+        <div class="logo">FCS</div>
+        <div>
+            <div class="slogan">FOFANA COMMERCE SERVICE</div>
+            <small>Le commerce sans frontières</small>
+        </div>
+    </div>
+
+<nav>
+    <a href="#accueil">Accueil</a>
+    <a href="#categories">Catégories</a>
+    <a href="#annonces">Explorer les annonces</a>
+    <a href="boutique.html">🏪 Boutiques fournisseurs</a>
+    <a href="espace.html">Mon espace</a>
+    <a href="panier.html">🛒 Mon panier</a>
+    <a href="#contact">Contact</a>
+</nav>
+
+</header>
+
+
+    <main>
+        <section class="hero" id="accueil">
+            <h1>Le commerce <span>sans frontières</span></h1>
+
+            <p>
+                Trouvez des produits, des logements et des services.
+                <br>
+                Une plateforme pensée pour le Sénégal et le monde.
+            </p>
+
+            <div class="search-box">
+                <input
+                    type="search"
+                    id="recherche"
+                    placeholder="Que recherchez-vous ?"
+                >
+
+                <button onclick="rechercher()">Rechercher</button>
+            </div>
+            <div class="hero-buttons">
+    <a href="#annonces" class="button">Explorer les annonces</a>
+    <a href="publier.html" class="button">Publier une annonce</a>
+</div>
+        </section>
+<section id="decouvrir-fcs" style="background:#111; color:white; padding:50px 7%;">
+    <h2 class="section-title" style="color:#d4af37;">
+        Découvrez FCS
+    </h2>
+
+<p style="text-align:center; line-height:1.8; margin-bottom:30px;">
+    Une marketplace qui connecte les particuliers, les commerçants,
+    les grossistes et les fournisseurs au Sénégal et dans le monde.
+</p>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px;">
+
+    <a href="#annonces" style="text-decoration:none; color:white; background:#1b1b1b; border:1px solid #d4af37; border-radius:12px; padding:25px; text-align:center;">
+        <div style="font-size:38px;">🛍️</div>
+        <h3 style="color:#d4af37; margin:12px 0;">Acheter des produits</h3>
+        <p>Découvrez des produits et achetez selon vos besoins.</p>
+    </a>
+
+    <a href="#annonces" style="text-decoration:none; color:white; background:#1b1b1b; border:1px solid #d4af37; border-radius:12px; padding:25px; text-align:center;">
+        <div style="font-size:38px;">📦</div>
+        <h3 style="color:#d4af37; margin:12px 0;">Acheter en gros</h3>
+        <p>Trouvez des offres adaptées aux commerçants et revendeurs.</p>
+    </a>
+
+    <a href="#annonces" style="text-decoration:none; color:white; background:#1b1b1b; border:1px solid #d4af37; border-radius:12px; padding:25px; text-align:center;">
+        <div style="font-size:38px;">🏭</div>
+        <h3 style="color:#d4af37; margin:12px 0;">Trouver des fournisseurs</h3>
+        <p>Découvrez des vendeurs et des partenaires commerciaux.</p>
+    </a>
+
+    <a href="publier.html" style="text-decoration:none; color:white; background:#1b1b1b; border:1px solid #d4af37; border-radius:12px; padding:25px; text-align:center;">
+        <div style="font-size:38px;">🌍</div>
+        <h3 style="color:#d4af37; margin:12px 0;">Vendre sur FCS</h3>
+        <p>Publiez vos produits et développez votre activité.</p>
+    </a>
+
+</div>
+
+</section>
+
+        <section id="categories">
+    <h2 class="section-title">Explorez nos catégories</h2>
+
+<div class="categories">
+
+    <div class="category" onclick="filtrer('Commerce')">
+        <div class="icon">🛍️</div>
+        <h3>Commerce général</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Électronique')">
+        <div class="icon">📱</div>
+        <h3>Électronique</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Véhicules')">
+        <div class="icon">🚗</div>
+        <h3>Véhicules et motos</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Immobilier')">
+        <div class="icon">🏠</div>
+        <h3>Immobilier</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Mode')">
+        <div class="icon">👕</div>
+        <h3>Mode et accessoires</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Maison')">
+        <div class="icon">🛋️</div>
+        <h3>Maison et mobilier</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Agriculture')">
+        <div class="icon">🌾</div>
+        <h3>Agriculture et élevage</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Services')">
+        <div class="icon">🛠️</div>
+        <h3>Services</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Emploi')">
+        <div class="icon">💼</div>
+        <h3>Emploi</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('Loisirs')">
+        <div class="icon">🎮</div>
+        <h3> Loisirs et divertissement</h3>
+    </div>
+
+    <div class="category" onclick="filtrer('International')">
+        <div class="icon">🌍</div>
+        <h3>International</h3>
+    </div>
+
+</div>
+
+</section>
+
+<section id="opportunites" style="background:#f1eee5; padding:50px 7%;">
+
+<h2 class="section-title">Opportunités commerciales</h2>
+
+<p style="text-align:center; margin-bottom:30px; line-height:1.7;">
+    Développez votre activité grâce aux fournisseurs, grossistes
+    et partenaires commerciaux présents sur FCS.
+</p>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px;">
+
+    <article style="background:white; padding:25px; border-radius:12px; border-top:4px solid #d4af37; text-align:center;">
+        <div style="font-size:38px;">🌍</div>
+        <h3>Fournisseurs internationaux</h3>
+        <p style="margin:12px 0;">Découvrez des fournisseurs de différents pays.</p>
+        <a href="#annonces">Explorer les annonces</a>
+    </article>
+
+    <article style="background:white; padding:25px; border-radius:12px; border-top:4px solid #d4af37; text-align:center;">
+        <div style="font-size:38px;">📦</div>
+        <h3>Produits en gros</h3>
+        <p style="margin:12px 0;">Recherchez des produits pour vos activités commerciales.</p>
+        <a href="#annonces">Voir les produits</a>
+    </article>
+
+    <article style="background:white; padding:25px; border-radius:12px; border-top:4px solid #d4af37; text-align:center;">
+        <div style="font-size:38px;">🤝</div>
+        <h3>Partenaires commerciaux</h3>
+        <p style="margin:12px 0;">Trouvez des vendeurs et des partenaires.</p>
+        <a href="#annonces">Découvrir</a>
+    </article>
+
+    <article style="background:white; padding:25px; border-radius:12px; border-top:4px solid #d4af37; text-align:center;">
+        <div style="font-size:38px;">📝</div>
+        <h3>Demandes de devis</h3>
+        <p style="margin:12px 0;">Préparez vos futures demandes de prix auprès des fournisseurs.</p>
+        <a href="publier.html">Publier une annonce</a>
+    </article>
+
+</div>
+
+</section>
+
+
+        <section id="annonces">
+            <h2 class="section-title">Quelques annonces</h2>
+
+            <div class="listings" id="liste-annonces">
+
+                <article class="listing" data-categorie="Commerce">
+                    <span class="badge">Commerce</span>
+                    <h3>Téléphone portable</h3>
+                    <p>Exemple de produit proposé sur FCS.</p>
+                    <p class="price">75 000 FCFA</p>
+                    <p>📍 Dakar, Sénégal</p>
+                </article>
+
+                <article class="listing" data-categorie="Immobilier">
+                    <span class="badge">Immobilier</span>
+                    <h3>Appartement à louer</h3>
+                    <p>Exemple d'annonce immobilière.</p>
+                    <p class="price">150 000 FCFA / mois</p>
+                    <p>📍 Keur Massar, Sénégal</p>
+                </article>
+
+                <article class="listing" data-categorie="Transport">
+                    <span class="badge">Transport</span>
+                    <h3>Service de transport</h3>
+                    <p>Exemple de service de déplacement.</p>
+                    <p class="price">Tarif à négocier</p>
+                    <p>📍 Dakar, Sénégal</p>
+                </article>
+
+                <article class="listing" data-categorie="Services">
+                    <span class="badge">Services</span>
+                    <h3>Services professionnels</h3>
+                    <p>Exemple d'offre de service.</p>
+                    <p class="price">Sur devis</p>
+                    <p>📍 Sénégal</p>
+                </article>
+
+                <article class="listing" data-categorie="International">
+                    <span class="badge">International</span>
+                    <h3>Commerce international</h3>
+                    <p>Exemple d'offre destinée à plusieurs pays.</p>
+                    <p class="price">Prix à confirmer</p>
+                    <p>📍 International</p>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <footer id="contact">
+        <h3><span>FOFANA COMMERCE SERVICE</span></h3>
+        <p>Le commerce sans frontières.</p>
+        <p>Une plateforme en cours de développement.</p>
+        <p>&copy; 2026 FCS — Tous droits réservés.</p>
+    </footer>
+
+    <script>
+const FCS_URL = "https://ixetvhbkhboxfjlykclo.supabase.co";
+const FCS_KEY = "sb_publishable_c0KiidatgOYE_0wFk3hy2Q_sWRSsxHZ";
+
+const fcsSupabase = window.supabase.createClient(FCS_URL, FCS_KEY);
+
+const listeAnnonces = document.getElementById("liste-annonces");
+
+// Sécuriser les textes affichés dans les annonces
+function securiser(texte) {
+    return String(texte ?? "").replace(/[&<>"']/g, caractere => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[caractere]);
+}
+
+// Charger les annonces depuis Supabase
+async function chargerAnnonces() {
+const { data, error } = await fcsSupabase
+.from("listings")
+.select("*")
+.eq("status", "published")
+.order("created_at", { ascending: false });
+
+if (error) {
+    console.error("Erreur de chargement :", error.message);
+    listeAnnonces.textContent = "Impossible de charger les annonces.";
+    return;
+}
+
+if (!data || data.length === 0) {
+    listeAnnonces.textContent = "Aucune annonce publiée pour le moment.";
+    return;
+}
+window.annoncesFCS = data;
+listeAnnonces.innerHTML = data.map(annonce => {
+    const photos = Array.isArray(annonce.images) ? annonce.images : [];
+
+    const affichagePhotos = photos.length > 0
+        ? photos.map(photo => `
+            <img
+                src="${securiser(photo)}"
+                alt="${securiser(annonce.title)}"
+                style="width:100%; max-width:220px; height:180px; object-fit:cover; border-radius:10px; margin:5px;"
+            >
+        `).join("")
+        : `<p style="color:#aaa;">Aucune photo disponible</p>`;
+
+    return `
+        <div class="listing" data-categorie="${securiser(annonce.category)}">
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+    ${affichagePhotos}
+</div>
+
+<span class="badge" style="margin-top:10px; display:inline-block;">
+    ${securiser(annonce.offer_type || "Vente au détail")}
+</span>
+
+<h3>${securiser(annonce.title)}</h3>
+            <p>${securiser(annonce.description)}</p>
+            <p><strong>Prix :</strong> ${securiser(annonce.price)} ${securiser(annonce.currency || "XOF")}</p>
+            <p><strong>Ville :</strong> ${securiser(annonce.city)}</p>
+            <p><strong>Pays :</strong> ${securiser(annonce.country)}</p>
+            <a href="boutique-detail.html?id=${encodeURIComponent(annonce.user_id)}"
+   style="display:block; text-align:center; margin:12px 0; padding:10px; background:#d4af37; color:#080808; text-decoration:none; border-radius:6px; font-weight:bold;">
+    🏪 Visiter la boutique du vendeur
+</a>
+<a href="messagerie.html?listing_id=${encodeURIComponent(annonce.id)}&seller_id=${encodeURIComponent(annonce.user_id)}"
+   style="display:block; text-align:center; margin:12px 0; padding:10px; background:#222; color:#d4af37; text-decoration:none; border:1px solid #d4af37; border-radius:6px; font-weight:bold;">
+    💬 Contacter le vendeur
+</a>
+            <button
+    class="button"
+    onclick="ajouterAuPanier(${data.indexOf(annonce)})"
+>
+    🛒 Ajouter au panier
+</button>
+<button
+    class="button"
+    onclick="ajouterAuxFavoris(${data.indexOf(annonce)})"
+>
+    ❤️ Ajouter aux favoris
+</button>
+            <p><strong>Catégorie :</strong> ${securiser(annonce.category)}</p>
+            <a href="details.html?id=${encodeURIComponent(annonce.id)}" class="button">
+    Voir les détails
+</a>
+        </div>
+    `;
+}).join("");
+
+}
+
+
+// Recherche des annonces
+function rechercher() {
+    const recherche = document.getElementById("recherche").value.toLowerCase();
+
+    document.querySelectorAll(".listing").forEach(annonce => {
+        annonce.style.display =
+            annonce.textContent.toLowerCase().includes(recherche)
+            ? ""
+            : "none";
+    });
+}
+
+// Filtrer par catégorie
+function filtrer(categorie) {
+    document.querySelectorAll(".listing").forEach(annonce => {
+        annonce.style.display =
+            categorie === "Tous" ||
+            annonce.dataset.categorie.toLowerCase() === categorie.toLowerCase()
+            ? ""
+            : "none";
+    });
+}
+
+// Charger les annonces au démarrage
+chargerAnnonces();
+
+    function ajouterAuxFavoris(index) {
+
+    const annonce = window.annoncesFCS[index];
+
+    if (!annonce) {
+        return;
+    }
+
+    const favoris = JSON.parse(
+        localStorage.getItem("fcs_favoris") || "[]"
+    );
+
+    const existe = favoris.some(
+        article => article.id === annonce.id
+    );
+
+    if (existe) {
+        return;
+    }
+
+    favoris.push({
+        id: annonce.id,
+        title: annonce.title,
+        price: Number(annonce.price || 0),
+        currency: annonce.currency || "FCFA",
+        image: annonce.images?.[0] || ""
+    });
+
+    localStorage.setItem("fcs_favoris", JSON.stringify(favoris));
+}
+function ajouterAuPanier(index) {
+
+    const annonce = window.annoncesFCS[index];
+
+    if (!annonce) {
+        return;
+    }
+
+    const panier = JSON.parse(
+        localStorage.getItem("fcs_panier") || "[]"
+    );
+
+    const articleExistant = panier.find(
+        article => article.id === annonce.id
+    );
+
+    if (articleExistant) {
+        articleExistant.quantity += 1;
+    } else {
+        panier.push({
+            id: annonce.id,
+            seller_id: annonce.user_id,
+            title: annonce.title,
+            price: Number(annonce.price || 0),
+            image: annonce.images?.[0] || "",
+            quantity: 1
+        });
+    }
+
+    localStorage.setItem("fcs_panier", JSON.stringify(panier));
+}
+</script>
+</body>
+</html>

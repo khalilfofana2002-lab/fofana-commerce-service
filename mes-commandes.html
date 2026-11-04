@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mes commandes | FCS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #080808;
+            color: white;
+        }
+
+        header {
+            background: #111;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        header h1 {
+            color: #d4af37;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .commande-card {
+            background: #151515;
+            border: 1px solid #8f7523;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .commande-card h2 {
+            color: #d4af37;
+        }
+
+        .commande-card p {
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            background: #d4af37;
+            color: #080808;
+            padding: 12px 20px;
+            margin-top: 15px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .button:hover {
+            background: #f0d46b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>📦 Mes commandes</h1>
+    </header>
+
+    <main class="container">
+
+        <div class="commande-card">
+            <h2>Bienvenue dans vos commandes</h2>
+
+            <p>
+                Retrouvez ici vos commandes effectuées sur FCS.
+            </p>
+
+            <p>
+                Vos commandes seront affichées dans cet espace.
+            </p>
+
+            <a href="index.html" class="button">
+                Retour à l'accueil
+            </a>
+        </div>
+<section id="listeCommandes">
+
+    <h2 style="color: #d4af37; text-align: center;">
+        Historique de mes commandes
+    </h2>
+
+    <div id="contenuCommandes">
+        Chargement des commandes...
+    </div>
+
+</section>
+    </main>
+<script type="module">
+
+import { supabase } from "./supabase.js";
+
+async function afficherCommandes() {
+
+    const contenu = document.getElementById("contenuCommandes");
+
+    contenu.innerHTML = "Chargement de vos commandes...";
+
+    try {
+
+        // Vérifier le client connecté
+        const { data: { user }, error: userError } =
+            await supabase.auth.getUser();
+
+        if (userError || !user) {
+            contenu.innerHTML = `
+                <div class="commande-card">
+                    <h3>Connexion nécessaire</h3>
+                    <p>Veuillez vous connecter pour consulter vos commandes.</p>
+                    <a href="compte.html" class="button">
+                       Se connecter
+                    </a>
+                </div>
+            `;
+            return;
+        }
+
+        // Récupérer les commandes dans Supabase
+        const { data: commandes, error } = await supabase
+            .from("orders")
+            .select("id, created_at, items, total, status")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+
+        if (error) {
+            console.error(error);
+            contenu.textContent = "Impossible de charger vos commandes.";
+            return;
+        }
+
+        if (!commandes || commandes.length === 0) {
+            contenu.innerHTML = `
+                <div class="commande-card">
+                    <h3>Aucune commande pour le moment</h3>
+                    <p>Vos commandes apparaîtront ici après leur validation.</p>
+                </div>
+            `;
+            return;
+        }
+
+        contenu.innerHTML = commandes.map(commande => {
+
+            const articles = Array.isArray(commande.items)
+                ? commande.items
+                : [];
+
+            const articlesHTML = articles.map(article => {
+
+                const prix = Number(article.price || 0);
+                const quantite = Number(article.quantity || 1);
+
+                return `
+                    <div style="border-bottom:1px solid #8f7523;padding:10px 0;">
+                        <strong>${article.title || article.name || "Article"}</strong>
+                        <p>Quantité : ${quantite}</p>
+                        <p>Prix : ${prix.toLocaleString("fr-FR")} FCFA</p>
+                    </div>
+                `;
+
+            }).join("");
+
+            const date = commande.created_at
+                ? new Date(commande.created_at).toLocaleString("fr-FR")
+                : "Date inconnue";
+
+            return `
+                <div class="commande-card" style="margin-bottom:20px;">
+
+                    <h3>Commande n° ${commande.id}</h3>
+
+                    <p>Date : ${date}</p>
+
+                    ${articlesHTML}
+
+                    <h3 style="color:#d4af37;">
+                        Total : ${Number(commande.total).toLocaleString("fr-FR")} FCFA
+                    </h3>
+
+                    <p>Statut : ${commande.status || "En attente"}</p>
+
+                </div>
+            `;
+
+        }).join("");
+
+    } catch (erreur) {
+
+        console.error(erreur);
+        contenu.textContent = "Une erreur est survenue lors du chargement.";
+
+    }
+}
+
+afficherCommandes();
+
+</script>
+</body>
+</html>

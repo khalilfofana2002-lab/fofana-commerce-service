@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon compte | FOFANA COMMERCE SERVICE</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 15px;
+            background: #080808;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 450px;
+            margin: 30px auto;
+            padding: 30px;
+            background: #151515;
+            border: 1px solid #d4af37;
+            border-radius: 15px;
+        }
+
+        h1, h2 {
+            color: #d4af37;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            color: #ccc;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 13px;
+            margin: 9px 0;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input {
+            background: #080808;
+            border: 1px solid #8f7523;
+            color: white;
+        }
+
+        button {
+            background: #d4af37;
+            border: none;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .switch {
+            background: transparent;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+        }
+
+        #message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 7px;
+    text-align: center;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+#message.succes {
+    background: #12351f;
+    color: #55df83;
+    border: 1px solid #278447;
+}
+
+#message.erreur {
+    background: #3a1515;
+    color: #ff7777;
+    border: 1px solid #a52222;
+}
+
+#message.attente {
+    background: #30280f;
+    color: #d4af37;
+    border: 1px solid #8f7523;
+}
+
+        a {
+            display: block;
+            text-align: center;
+            color: #d4af37;
+            margin-top: 20px;
+        }
+        .password-container {
+         position: relative;
+         width: 100%;
+        }
+
+         .password-container input {
+          width: 100%;
+          box-sizing: border-box;
+          padding-right: 45px;
+        }
+
+          .password-container button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #d4af37;
+}
+        
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>FOFANA COMMERCE SERVICE</h1>
+    <p>Bienvenue sur votre espace personnel</p>
+
+    <h2 id="titre">Créer un compte</h2>
+
+    <form id="form-compte">
+
+        <input
+            type="text"
+            id="nom"
+            placeholder="Nom complet"
+            required
+        >
+
+        <input
+            type="tel"
+            id="telephone"
+            placeholder="Numéro de téléphone"
+            required
+        >
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Adresse e-mail"
+            required
+        >
+
+        <div class="password-container">
+    <input
+        type="password"
+        id="motdepasse"
+        placeholder="Mot de passe (6 caractères minimum)"
+        minlength="6"
+        required
+    >
+
+<button
+    type="button"
+    id="togglePassword"
+    onclick="voirMasquerMotDePasse()"
+    aria-label="Afficher ou masquer le mot de passe"
+>
+    👁
+</button>
+
+</div>
+
+        <button type="submit" id="bouton">
+            Créer mon compte
+        </button>
+
+    </form>
+
+    <button class="switch" onclick="changerMode()">
+        Déjà inscrit ? Se connecter
+    </button>
+
+    <div id="message"></div>
+
+    <a href="index.html">← Retour à FCS</a>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://ixetvhbkhboxfjlykclo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_c0KiidatgOYE_0wFk3hy2Q_sWRSsxHZ";
+
+const fcsSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+let modeInscription = true;
+
+function changerMode() {
+    modeInscription = !modeInscription;
+
+    document.getElementById("titre").textContent =
+        modeInscription ? "Créer un compte" : "Se connecter";
+
+    document.getElementById("nom").style.display =
+        modeInscription ? "block" : "none";
+
+    document.getElementById("telephone").style.display =
+        modeInscription ? "block" : "none";
+
+    document.getElementById("nom").required = modeInscription;
+    document.getElementById("telephone").required = modeInscription;
+
+    document.getElementById("bouton").textContent =
+        modeInscription ? "Créer mon compte" : "Me connecter";
+
+    document.querySelector(".switch").textContent =
+        modeInscription ? "Déjà inscrit ? Se connecter" : "Créer un compte";
+
+    document.getElementById("message").textContent = "";
+}
+
+document.getElementById("form-compte").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const nom = document.getElementById("nom").value.trim();
+    const telephone = document.getElementById("telephone").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const motdepasse = document.getElementById("motdepasse").value;
+
+    const message = document.getElementById("message");
+    const bouton = document.getElementById("bouton");
+
+    bouton.disabled = true;
+    message.className = "attente";
+message.textContent = "Veuillez patienter...";
+
+    try {
+        let resultat;
+
+        if (modeInscription) {
+            resultat = await fcsSupabase.auth.signUp({
+                email: email,
+                password: motdepasse,
+                options: {
+                    data: {
+                        full_name: nom,
+                        phone: telephone
+                    }
+                }
+            });
+
+            if (!resultat.error) {
+                 message.className = "succes";
+
+             message.textContent =
+             "Inscription réussie ! Vérifiez votre e-mail pour confirmer votre compte.";
+            }
+
+        } else {
+            resultat = await fcsSupabase.auth.signInWithPassword({
+                email: email,
+                password: motdepasse
+            });
+
+            if (!resultat.error) {
+    message.className = "succes";
+    message.textContent = "Connexion réussie ! Bienvenue sur FCS.";
+
+    setTimeout(() => {
+        window.location.href = "espace.html";
+    }, 1200);
+}
+        }
+
+        if (resultat.error) {
+    message.className = "erreur";
+    message.textContent = "Erreur : " + resultat.error.message;
+}
+
+    } catch (erreur) {
+    message.className = "erreur";
+    message.textContent = "Une erreur est survenue : " + erreur.message;
+}
+
+    bouton.disabled = false;
+});
+function voirMasquerMotDePasse() {
+const champ = document.getElementById("motdepasse");
+const bouton = document.getElementById("togglePassword");
+
+if (champ.type === "password") {
+    champ.type = "text";
+    bouton.textContent = "🙈";
+} else {
+    champ.type = "password";
+    bouton.textContent = "👁";
+}
+
+}
+
+</script>
+
+</body>
+</html>

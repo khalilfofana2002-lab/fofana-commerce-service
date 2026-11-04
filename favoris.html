@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes favoris | FCS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #080808;
+            color: white;
+        }
+
+        header {
+            background: #111;
+            padding: 20px;
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h2 {
+            color: #d4af37;
+            margin: 0;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #d4af37;
+            text-align: center;
+        }
+
+        .favoris {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .article {
+            background: #151515;
+            border: 1px solid #8f7523;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .article img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .article h3 {
+            color: #d4af37;
+        }
+
+        .supprimer {
+            background: #a52222;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .vide {
+            text-align: center;
+            color: #bbb;
+            padding: 30px;
+        }
+
+        .retour {
+            display: inline-block;
+            margin-top: 25px;
+            background: #d4af37;
+            color: #080808;
+            padding: 12px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>FCS | ❤️ Mes favoris</h2>
+    <a href="index.html">← Accueil</a>
+</header>
+
+<main>
+
+    <h1>Mes annonces favorites ❤️</h1>
+
+    <p style="text-align:center; color:#bbb;">
+        Retrouvez ici les annonces que vous aimez.
+    </p>
+
+    <div class="favoris" id="listeFavoris">
+        <div class="vide">Chargement des favoris...</div>
+    </div>
+
+    <a href="index.html" class="retour">Explorer les annonces</a>
+
+</main>
+
+<script>
+    const CLE_FAVORIS = "fcs_favoris";
+
+    function afficherFavoris() {
+
+        const favoris = JSON.parse(
+            localStorage.getItem(CLE_FAVORIS) || "[]"
+        );
+
+        const liste = document.getElementById("listeFavoris");
+
+        if (favoris.length === 0) {
+            liste.innerHTML = `
+                <div class="vide">
+                    Vous n'avez pas encore ajouté de favoris.
+                </div>
+            `;
+            return;
+        }
+
+        liste.innerHTML = favoris.map((article, index) => `
+            <div class="article">
+
+                ${article.image ? `
+                    <img src="${article.image}" alt="Photo de l'annonce">
+                ` : ""}
+
+                <h3>${article.title || "Annonce sans titre"}</h3>
+
+                <p>
+                    Prix : ${Number(article.price || 0).toLocaleString("fr-FR")}
+                    ${article.currency || "FCFA"}
+                </p>
+
+                <button class="supprimer"
+                    onclick="retirerFavori(${index})">
+                    Retirer des favoris
+                </button>
+
+            </div>
+        `).join("");
+    }
+
+    function retirerFavori(index) {
+
+        const favoris = JSON.parse(
+            localStorage.getItem(CLE_FAVORIS) || "[]"
+        );
+
+        favoris.splice(index, 1);
+
+        localStorage.setItem(CLE_FAVORIS, JSON.stringify(favoris));
+
+        afficherFavoris();
+    }
+
+    afficherFavoris();
+</script>
+
+</body>
+</html>

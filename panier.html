@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon panier | FCS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #080808;
+            color: white;
+        }
+
+        header {
+            background: #111;
+            padding: 20px;
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h2 {
+            color: #d4af37;
+            margin: 0;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #d4af37;
+            text-align: center;
+        }
+
+        .panier {
+            background: #151515;
+            border: 1px solid #8f7523;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .vide {
+            text-align: center;
+            color: #bbb;
+            padding: 30px;
+        }
+
+        .article {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 18px 0;
+            border-bottom: 1px solid #444;
+            flex-wrap: wrap;
+        }
+
+        .article img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .infos {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .infos h3 {
+            color: #d4af37;
+        }
+
+        .quantite {
+            width: 65px;
+            padding: 8px;
+        }
+
+        .supprimer {
+            background: #a52222;
+            color: white;
+            border: none;
+            padding: 9px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 22px;
+            color: #d4af37;
+            margin-top: 25px;
+        }
+
+        .bouton {
+            display: inline-block;
+            background: #d4af37;
+            color: #080808;
+            padding: 13px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        @media(max-width: 600px) {
+            .actions {
+                flex-direction: column;
+            }
+
+            .actions .bouton {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>FCS | Mon panier 🛒</h2>
+    <a href="index.html">← Retour à l'accueil</a>
+</header>
+
+<main>
+
+    <h1>Mon panier d'achat</h1>
+
+    <p style="text-align:center; color:#bbb;">
+        Retrouvez ici les articles que vous souhaitez acheter.
+    </p>
+
+    <div class="panier">
+
+        <div id="contenuPanier">
+            <div class="vide">
+                Votre panier est actuellement vide.
+            </div>
+        </div>
+
+        <div class="total" id="montantTotal">
+            Total : 0 FCFA
+        </div>
+
+        <div class="actions">
+            <a href="index.html" class="bouton">
+                Continuer mes achats
+            </a>
+
+            <button class="bouton" onclick="validerPanier()">
+                Valider mon panier
+            </button>
+        </div>
+
+    </div>
+
+</main>
+
+<script type="module">
+    import { supabase } from "./supabase.js";
+    const CLE_PANIER = "fcs_panier";
+
+   async function afficherPanier() {
+
+    const panier = JSON.parse(
+        localStorage.getItem(CLE_PANIER) || "[]"
+    );
+
+    const contenu = document.getElementById("contenuPanier");
+    const totalElement = document.getElementById("montantTotal");
+
+    if (panier.length === 0) {
+        contenu.innerHTML = `
+            <div class="vide">
+                Votre panier est actuellement vide.
+            </div>
+        `;
+
+        totalElement.textContent = "Total : 0 FCFA";
+        return;
+    }
+
+    // Récupérer les identifiants des vendeurs
+    const vendeurs = [
+        ...new Set(panier.map(article => article.seller_id).filter(Boolean))
+    ];
+
+    // Récupérer les noms des boutiques dans Supabase
+    let nomsBoutiques = {};
+
+    if (vendeurs.length > 0) {
+        const { data, error } = await supabase
+            .from("supplier_stores")
+            .select("user_id, store_name")
+            .in("user_id", vendeurs);
+
+        if (!error && data) {
+            data.forEach(boutique => {
+                nomsBoutiques[boutique.user_id] = boutique.store_name;
+            });
+        }
+    }
+
+    let total = 0;
+
+    contenu.innerHTML = panier.map((article, index) => {
+
+        const prix = Number(article.price || 0);
+        const quantite = Number(article.quantity || 1);
+
+        total += prix * quantite;
+
+        const nomVendeur = nomsBoutiques[article.seller_id]
+            || "Boutique non disponible";
+
+        return `
+            <div class="article">
+
+                ${article.image ? `
+                    <img src="${article.image}" alt="Article">
+                ` : ""}
+
+                <div class="infos">
+                    <h3>${article.title || article.name || "Article"}</h3>
+
+                    <p>Prix : ${prix.toLocaleString("fr-FR")} FCFA</p>
+
+                    <p style="color:#d4af37;">
+                        Boutique : ${nomVendeur}
+                    </p>
+                </div>
+
+                <input
+                    class="quantite"
+                    type="number"
+                    min="1"
+                    value="${quantite}"
+                    onchange="changerQuantite(${index}, this.value)"
+                >
+
+                <button
+                    class="supprimer"
+                    onclick="supprimerArticle(${index})"
+                >
+                    Supprimer
+                </button>
+
+            </div>
+        `;
+
+    }).join("");
+
+    totalElement.textContent =
+        "Total : " + total.toLocaleString("fr-FR") + " FCFA";
+}
+
+    function changerQuantite(index, valeur) {
+
+        const panier = JSON.parse(
+            localStorage.getItem(CLE_PANIER) || "[]"
+        );
+
+        panier[index].quantity = Math.max(1, Number(valeur) || 1);
+
+        localStorage.setItem(CLE_PANIER, JSON.stringify(panier));
+
+        afficherPanier();
+    }
+
+    function supprimerArticle(index) {
+
+        const panier = JSON.parse(
+            localStorage.getItem(CLE_PANIER) || "[]"
+        );
+
+        panier.splice(index, 1);
+
+        localStorage.setItem(CLE_PANIER, JSON.stringify(panier));
+
+        afficherPanier();
+    }
+async function validerPanier() {
+
+    const panier = JSON.parse(
+        localStorage.getItem(CLE_PANIER) || "[]"
+    );
+
+    if (panier.length === 0) {
+        alert("Votre panier est vide.");
+        return;
+    }
+
+    let total = 0;
+
+    panier.forEach(article => {
+        const prix = Number(article.price || 0);
+        const quantite = Number(article.quantity || 1);
+        total += prix * quantite;
+    });
+
+    try {
+
+        // Vérifier si le client est connecté
+        const { data: { user }, error: userError } =
+            await supabase.auth.getUser();
+
+        if (userError || !user) {
+            alert("Veuillez vous connecter avant de valider votre commande.");
+            return;
+        }
+
+        // Enregistrer la commande dans Supabase
+        const { error } = await supabase
+            .from("orders")
+            .insert({
+                user_id: user.id,
+                items: panier,
+                total: total,
+                status: "En attente"
+            });
+
+        if (error) {
+            console.error(error);
+            alert("Erreur : votre commande n'a pas été enregistrée.");
+            return;
+        }
+
+        // Vider le panier après confirmation
+        localStorage.removeItem(CLE_PANIER);
+
+        alert("Votre commande a été enregistrée avec succès !");
+
+        afficherPanier();
+
+    } catch (erreur) {
+        console.error(erreur);
+        alert("Une erreur est survenue. Réessayez.");
+    }
+}
+       window.validerPanier = validerPanier;
+    window.changerQuantite = changerQuantite;
+    window.supprimerArticle = supprimerArticle;
+
+    afficherPanier();
+</script>
+
+</body>
+</html>

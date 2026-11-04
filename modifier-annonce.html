@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Modifier une annonce | FCS</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080808;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #111;
+    padding: 20px;
+    border-bottom: 1px solid #d4af37;
+}
+
+header h1 {
+    color: #d4af37;
+}
+
+.container {
+    max-width: 700px;
+    margin: 35px auto;
+    padding: 20px;
+}
+
+h2 {
+    color: #d4af37;
+}
+
+label {
+    display: block;
+    margin-top: 18px;
+    color: #d4af37;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    background: #151515;
+    color: white;
+    border: 1px solid #8f7523;
+    border-radius: 6px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+button {
+    margin-top: 25px;
+    padding: 13px 20px;
+    background: #d4af37;
+    color: #080808;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.message {
+    color: #ccc;
+    margin-top: 20px;
+}
+
+.retour {
+    color: #d4af37;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>FCS</h1>
+    <a class="retour" href="mes-annonces.html">
+        ← Retour à mes annonces
+    </a>
+</header>
+
+<div class="container">
+
+    <h2>✏️ Modifier mon annonce</h2>
+
+    <p class="message" id="message">
+        Chargement de l'annonce...
+    </p>
+
+    <form id="formulaire" style="display:none;">
+
+        <label for="titre">Titre de l'annonce</label>
+        <input type="text" id="titre" required>
+
+        <label for="categorie">Catégorie</label>
+        <input type="text" id="categorie" required>
+
+        <label for="description">Description</label>
+        <textarea id="description" required></textarea>
+
+        <label for="prix">Prix (FCFA)</label>
+        <input type="number" id="prix" min="0" required>
+
+        <label for="ville">Ville</label>
+        <input type="text" id="ville" required>
+
+        <label for="pays">Pays</label>
+        <input type="text" id="pays" required>
+
+        <label for="telephone">Numéro WhatsApp</label>
+        <input type="tel" id="telephone" required>
+
+        <button type="submit">
+            Enregistrer les modifications
+        </button>
+
+    </form>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase.createClient(
+    "https://ixetvhbkhboxfjlykclo.supabase.co",
+    "sb_publishable_c0KiidatgOYE_0wFk3hy2Q_sWRSsxHZ"
+);
+
+const formulaire = document.getElementById("formulaire");
+const message = document.getElementById("message");
+
+const params = new URLSearchParams(window.location.search);
+const annonceId = params.get("id");
+
+let utilisateurConnecte = null;
+
+async function chargerAnnonce() {
+
+    const { data: { user }, error: erreurConnexion } =
+        await supabaseClient.auth.getUser();
+
+    if (erreurConnexion || !user) {
+        window.location.href = "compte.html";
+        return;
+    }
+
+    utilisateurConnecte = user;
+
+    if (!annonceId) {
+        message.textContent = "Identifiant de l'annonce manquant.";
+        return;
+    }
+
+    const { data: annonce, error } = await supabaseClient
+        .from("listings")
+        .select("*")
+        .eq("id", annonceId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (error || !annonce) {
+        message.textContent =
+            "Annonce introuvable ou vous n'en êtes pas le propriétaire.";
+        return;
+    }
+
+    document.getElementById("titre").value =
+        annonce.title || "";
+
+    document.getElementById("categorie").value =
+        annonce.category || "";
+
+    document.getElementById("description").value =
+        annonce.description || "";
+
+    document.getElementById("prix").value =
+        annonce.price ?? "";
+
+    document.getElementById("ville").value =
+        annonce.city || "";
+
+    document.getElementById("pays").value =
+        annonce.country || "";
+
+    document.getElementById("telephone").value =
+        annonce.seller_phone || "";
+
+    message.textContent = "";
+
+    formulaire.style.display = "block";
+}
+
+formulaire.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    if (!utilisateurConnecte) {
+        alert("Vous devez être connecté.");
+        return;
+    }
+
+    const titre = document.getElementById("titre").value.trim();
+    const categorie = document.getElementById("categorie").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const prix = Number(document.getElementById("prix").value);
+    const ville = document.getElementById("ville").value.trim();
+    const pays = document.getElementById("pays").value.trim();
+    const telephone = document.getElementById("telephone").value.trim();
+
+    if (!titre || !categorie || !description ||
+        !ville || !pays || !telephone ||
+        !Number.isFinite(prix) || prix < 0) {
+
+        alert("Veuillez remplir correctement tous les champs.");
+        return;
+    }
+
+    message.textContent = "Enregistrement en cours...";
+
+    const { error } = await supabaseClient
+        .from("listings")
+        .update({
+            title: titre,
+            category: categorie,
+            description: description,
+            price: prix,
+            city: ville,
+            country: pays,
+            seller_phone: telephone
+        })
+        .eq("id", annonceId)
+        .eq("user_id", utilisateurConnecte.id);
+
+    if (error) {
+        message.textContent =
+            "Erreur : " + error.message;
+        return;
+    }
+
+    alert("Annonce modifiée avec succès !");
+
+    window.location.href = "mes-annonces.html";
+});
+
+chargerAnnonce();
+</script>
+
+</body>
+</html>

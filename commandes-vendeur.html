@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Commandes vendeur | FCS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #080808;
+            color: white;
+        }
+
+        header {
+            background: #111;
+            padding: 20px;
+            border-bottom: 2px solid #d4af37;
+            text-align: center;
+        }
+
+        header h1 {
+            color: #d4af37;
+            margin: 0;
+        }
+
+        nav {
+            margin-top: 15px;
+        }
+
+        nav a {
+            color: #d4af37;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 15px;
+        }
+
+        h2 {
+            color: #d4af37;
+        }
+
+        .commande {
+            background: #151515;
+            border: 1px solid #8f7523;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .commande h3 {
+            color: #d4af37;
+        }
+
+        .article {
+            border-top: 1px solid #333;
+            padding: 12px 0;
+        }
+
+        .article img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+
+        .article-contenu {
+            display: flex;
+            align-items: center;
+        }
+
+        .prix {
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .message {
+            padding: 15px;
+            background: #151515;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: #d4af37;
+            color: black;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #f0cc55;
+        }
+
+        @media (max-width: 600px) {
+            .article-contenu {
+                align-items: flex-start;
+            }
+
+            .article img {
+                width: 65px;
+                height: 65px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>FCS | Commandes vendeur</h1>
+
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="mes-annonces.html">Mes annonces</a>
+        <a href="profil.html">Mon profil</a>
+    </nav>
+</header>
+
+<main>
+    <h2>Mes commandes reçues</h2>
+
+    <p>
+        Retrouvez ici les commandes contenant vos articles.
+    </p>
+
+    <div id="message" class="message">
+        Chargement des commandes...
+    </div>
+
+    <div id="commandes"></div>
+</main>
+
+<script type="module">
+    import { supabase } from "./supabase.js";
+
+    const message = document.getElementById("message");
+    const commandesContainer = document.getElementById("commandes");
+
+    async function chargerCommandes() {
+        const { data: { user }, error: erreurConnexion } =
+            await supabase.auth.getUser();
+
+        if (erreurConnexion || !user) {
+            message.textContent =
+                "Connectez-vous pour consulter vos commandes vendeur.";
+            return;
+        }
+
+        const { data: commandes, error } = await supabase
+            .from("orders")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        if (error) {
+            message.textContent =
+                "Impossible de charger les commandes. Vérifiez les autorisations Supabase.";
+            console.error(error);
+            return;
+        }
+
+        commandesContainer.innerHTML = "";
+
+        let nombreCommandes = 0;
+
+        commandes.forEach(commande => {
+            const articles = Array.isArray(commande.items)
+                ? commande.items
+                : [];
+
+            const mesArticles = articles.filter(article =>
+                String(article.seller_id) === String(user.id)
+            );
+
+            if (mesArticles.length === 0) {
+                return;
+            }
+
+            nombreCommandes++;
+
+            const bloc = document.createElement("div");
+            bloc.className = "commande";
+
+            let totalVendeur = 0;
+
+            let contenuArticles = "";
+
+            mesArticles.forEach(article => {
+                const quantite = Number(article.quantity || 0);
+                const prix = Number(article.price || 0);
+                const sousTotal = quantite * prix;
+
+                totalVendeur += sousTotal;
+
+                contenuArticles += `
+                    <div class="article">
+                        <div class="article-contenu">
+                            <img
+                                src="${article.image || ""}"
+                                alt="Article"
+                            >
+
+                            <div>
+                                <strong>${article.title || "Article"}</strong>
+
+                                <p>
+                                    Quantité : ${quantite}
+                                </p>
+
+                                <p class="prix">
+                                    ${sousTotal.toLocaleString("fr-FR")} FCFA
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            bloc.innerHTML = `
+                <h3>Commande #${commande.id}</h3>
+
+                <p>
+                    <strong>Date :</strong>
+                    ${commande.created_at
+                        ? new Date(commande.created_at).toLocaleDateString("fr-FR")
+                        : "Non disponible"}
+                </p>
+
+                <p>
+                    <strong>Statut :</strong>
+                    ${commande.status || "En attente"}
+                </p>
+
+                ${contenuArticles}
+
+                <h3>
+                    Total de vos articles :
+                    ${totalVendeur.toLocaleString("fr-FR")} FCFA
+                </h3>
+            `;
+
+            commandesContainer.appendChild(bloc);
+        });
+
+        if (nombreCommandes === 0) {
+            message.textContent =
+                "Vous n'avez pas encore reçu de commande.";
+        } else {
+            message.textContent =
+                nombreCommandes + " commande(s) trouvée(s).";
+        }
+    }
+
+    chargerCommandes();
+</script>
+
+</body>
+</html>

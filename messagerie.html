@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Messagerie | FCS</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080808;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #111;
+    padding: 20px;
+    border-bottom: 2px solid #d4af37;
+    text-align: center;
+}
+
+header h1 {
+    color: #d4af37;
+    margin: 0;
+}
+
+header a {
+    display: inline-block;
+    margin-top: 12px;
+    color: #d4af37;
+    text-decoration: none;
+}
+
+main {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 15px;
+}
+
+.messagerie {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    min-height: 500px;
+    border: 1px solid #8f7523;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.conversations {
+    background: #111;
+    border-right: 1px solid #8f7523;
+    padding: 15px;
+}
+
+.conversations h2 {
+    color: #d4af37;
+    font-size: 20px;
+}
+
+.conversation {
+    background: #1b1b1b;
+    border: 1px solid #444;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.conversation:hover,
+.conversation.active {
+    border-color: #d4af37;
+}
+
+.conversation p {
+    color: #bbb;
+    font-size: 13px;
+}
+
+.discussion {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #080808;
+}
+
+.discussion-header {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    color: #d4af37;
+    font-weight: bold;
+}
+
+.messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    min-height: 300px;
+    max-height: 450px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+.message.mien {
+    background: #d4af37;
+    color: #080808;
+    margin-left: auto;
+}
+
+.message.autre {
+    background: #222;
+    color: white;
+    margin-right: auto;
+}
+
+.date-message {
+    display: block;
+    font-size: 11px;
+    margin-top: 6px;
+    opacity: 0.7;
+}
+
+.formulaire {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    border-top: 1px solid #333;
+}
+
+.formulaire textarea {
+    flex: 1;
+    min-width: 0;
+    min-height: 45px;
+    resize: vertical;
+    padding: 12px;
+    background: #151515;
+    color: white;
+    border: 1px solid #8f7523;
+    border-radius: 6px;
+}
+
+button {
+    background: #d4af37;
+    color: #080808;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.message-info {
+    color: #d4af37;
+    text-align: center;
+    padding: 15px;
+}
+
+@media (max-width: 700px) {
+    .messagerie {
+        grid-template-columns: 1fr;
+    }
+
+    .conversations {
+        border-right: none;
+        border-bottom: 1px solid #8f7523;
+    }
+
+    .messages {
+        min-height: 250px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>💬 Messagerie FCS</h1>
+    <a href="index.html">← Retour à l'accueil</a>
+</header>
+
+<main>
+
+    <div class="messagerie">
+
+        <section class="conversations">
+            <h2>Mes conversations</h2>
+
+            <p id="messageConversations" class="message-info">
+                Chargement...
+            </p>
+
+            <div id="listeConversations"></div>
+        </section>
+
+        <section class="discussion">
+
+            <div class="discussion-header" id="titreDiscussion">
+                Sélectionnez une conversation
+            </div>
+
+            <div class="messages" id="listeMessages">
+                <p class="message-info">
+                    Vos messages apparaîtront ici.
+                </p>
+            </div>
+
+            <form class="formulaire" id="formMessage">
+
+                <textarea
+                    id="contenuMessage"
+                    placeholder="Écrire un message..."
+                    maxlength="5000"
+                    required
+                    disabled
+                ></textarea>
+
+                <button type="submit" id="boutonEnvoyer" disabled>
+                    Envoyer
+                </button>
+
+            </form>
+
+        </section>
+
+    </div>
+
+</main>
+
+<script type="module">
+
+import { supabase } from "./supabase.js";
+
+const messageConversations =
+    document.getElementById("messageConversations");
+
+const listeConversations =
+    document.getElementById("listeConversations");
+
+const listeMessages =
+    document.getElementById("listeMessages");
+
+const titreDiscussion =
+    document.getElementById("titreDiscussion");
+
+const formulaire =
+    document.getElementById("formMessage");
+
+const contenuMessage =
+    document.getElementById("contenuMessage");
+
+const boutonEnvoyer =
+    document.getElementById("boutonEnvoyer");
+
+let utilisateur = null;
+let conversationActive = null;
+
+
+// ======================================
+// 1. CHARGER LES CONVERSATIONS
+// ======================================
+
+async function chargerConversations() {
+
+    const { data: resultat, error: erreurUtilisateur } =
+        await supabase.auth.getUser();
+
+    if (erreurUtilisateur || !resultat.user) {
+        messageConversations.textContent =
+            "Vous devez être connecté pour accéder à la messagerie.";
+        return;
+    }
+
+    utilisateur = resultat.user;
+
+    const { data, error } = await supabase
+        .from("conversations")
+        .select("id, listing_id, buyer_id, seller_id, created_at")
+        .or(
+            `buyer_id.eq.${utilisateur.id},seller_id.eq.${utilisateur.id}`
+        )
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        messageConversations.textContent =
+            "Erreur : " + error.message;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        messageConversations.textContent =
+            "Vous n'avez pas encore de conversation.";
+        return;
+    }
+
+    messageConversations.textContent = "";
+
+    data.forEach(conversation => {
+
+        const carte = document.createElement("div");
+        carte.className = "conversation";
+
+        const autreUtilisateur =
+            conversation.buyer_id === utilisateur.id
+                ? conversation.seller_id
+                : conversation.buyer_id;
+
+        const titre = document.createElement("strong");
+
+        titre.textContent =
+            "Conversation avec " +
+            autreUtilisateur.substring(0, 8);
+
+        const description = document.createElement("p");
+
+        description.textContent =
+            "Cliquez pour consulter les messages.";
+
+        carte.append(titre, description);
+
+        carte.addEventListener("click", function () {
+
+            document
+                .querySelectorAll(".conversation")
+                .forEach(element => {
+                    element.classList.remove("active");
+                });
+
+            carte.classList.add("active");
+
+            ouvrirConversation(conversation);
+        });
+
+        listeConversations.appendChild(carte);
+    });
+}
+
+
+// ======================================
+// 2. OUVRIR UNE CONVERSATION
+// ======================================
+
+async function ouvrirConversation(conversation) {
+
+
+    conversationActive = conversation;
+
+    contenuMessage.disabled = false;
+    boutonEnvoyer.disabled = false;
+
+    titreDiscussion.textContent =
+        "Conversation avec " +
+        (
+            conversation.buyer_id === utilisateur.id
+                ? conversation.seller_id
+                : conversation.buyer_id
+        ).substring(0, 8);
+
+    await chargerMessages();
+}
+
+
+// ======================================
+// 3. CHARGER LES MESSAGES
+// ======================================
+
+async function chargerMessages() {
+
+    listeMessages.innerHTML = "";
+
+    const { data, error } = await supabase
+        .from("messages")
+        .select("id, sender_id, content, created_at")
+        .eq("conversation_id", conversationActive.id)
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        listeMessages.textContent =
+            "Erreur de chargement : " + error.message;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        listeMessages.textContent =
+            "Aucun message dans cette conversation.";
+        return;
+    }
+
+    data.forEach(message => {
+
+        const bulle = document.createElement("div");
+
+        bulle.className =
+            message.sender_id === utilisateur.id
+                ? "message mien"
+                : "message autre";
+
+        const texte = document.createElement("div");
+
+        texte.textContent = message.content;
+
+        const date = document.createElement("span");
+
+        date.className = "date-message";
+
+        date.textContent =
+            new Date(message.created_at).toLocaleString("fr-FR");
+
+        bulle.append(texte, date);
+
+        listeMessages.appendChild(bulle);
+    });
+
+    listeMessages.scrollTop = listeMessages.scrollHeight;
+}
+
+
+// ======================================
+// 4. ENVOYER UN MESSAGE
+// ======================================
+
+formulaire.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    if (!utilisateur || !conversationActive) {
+        return;
+    }
+
+    const contenu = contenuMessage.value.trim();
+
+    if (!contenu) {
+        return;
+    }
+
+    boutonEnvoyer.disabled = true;
+
+    const { error } = await supabase
+        .from("messages")
+        .insert({
+            conversation_id: conversationActive.id,
+            sender_id: utilisateur.id,
+            content: contenu
+        });
+
+    if (error) {
+
+        alert("Erreur d'envoi : " + error.message);
+
+        boutonEnvoyer.disabled = false;
+
+        return;
+    }
+
+    contenuMessage.value = "";
+
+    await chargerMessages();
+
+    boutonEnvoyer.disabled = false;
+});
+
+
+// ======================================
+// 5. DEMARRER LA MESSAGERIE
+// ======================================
+
+async function demarrerMessagerie() {
+
+    const parametres = new URLSearchParams(window.location.search);
+
+    const listingId = parametres.get("listing_id");
+    const sellerId = parametres.get("seller_id");
+
+    const { data: resultat, error: erreurUtilisateur } =
+        await supabase.auth.getUser();
+
+    if (erreurUtilisateur || !resultat.user) {
+        messageConversations.textContent =
+            "Connectez-vous pour accéder à la messagerie.";
+        return;
+    }
+
+    utilisateur = resultat.user;
+
+    // Si l'utilisateur vient d'une annonce
+    if (listingId && sellerId) {
+
+        if (utilisateur.id === sellerId) {
+            messageConversations.textContent =
+                "Vous ne pouvez pas contacter votre propre boutique.";
+            return;
+        }
+
+        // Vérifier si la conversation existe déjà
+        const { data: conversationExistante, error: erreurRecherche } =
+            await supabase
+                .from("conversations")
+                .select("id")
+                .eq("listing_id", listingId)
+                .eq("buyer_id", utilisateur.id)
+                .eq("seller_id", sellerId)
+                .maybeSingle();
+
+        if (erreurRecherche) {
+            messageConversations.textContent =
+                "Erreur : " + erreurRecherche.message;
+            return;
+        }
+
+        // Créer la conversation si elle n'existe pas
+        if (!conversationExistante) {
+
+            const { error: erreurCreation } = await supabase
+                .from("conversations")
+                .insert({
+                    listing_id: listingId,
+                    buyer_id: utilisateur.id,
+                    seller_id: sellerId
+                });
+
+            if (erreurCreation) {
+                messageConversations.textContent =
+                    "Erreur de création : " + erreurCreation.message;
+                return;
+            }
+        }
+    }
+
+    // Charger les conversations
+await chargerConversations();
+
+// Ouvrir automatiquement la conversation avec le vendeur
+if (listingId && sellerId) {
+    const { data: conversation } = await supabase
+        .from("conversations")
+        .select("id, listing_id, buyer_id, seller_id, created_at")
+        .eq("listing_id", listingId)
+        .eq("buyer_id", utilisateur.id)
+        .eq("seller_id", sellerId)
+        .maybeSingle();
+
+    if (conversation) {
+        await ouvrirConversation(conversation);
+    }
+}
+}
+
+demarrerMessagerie();
+
+</script>
+
+</body>
+</html>

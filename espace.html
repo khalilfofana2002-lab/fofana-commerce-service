@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon espace | FCS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #080808;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background: #111;
+            border-bottom: 1px solid #d4af37;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            color: #d4af37;
+            margin: 0;
+            font-size: 22px;
+        }
+
+        nav a {
+            color: #d4af37;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .welcome {
+            background: #151515;
+            border: 1px solid #8f7523;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            color: #d4af37;
+            margin-top: 0;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #151515;
+            border: 1px solid #8f7523;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .card h3 {
+            color: #d4af37;
+        }
+
+        .card p {
+            color: #ccc;
+        }
+
+        .button {
+            display: inline-block;
+            background: #d4af37;
+            color: #080808;
+            padding: 12px 18px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .logout {
+            background: #d4af37;
+            color: #080808;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #999;
+            border-top: 1px solid #333;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav a {
+                display: inline-block;
+                margin: 8px 8px 8px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>FOFANA COMMERCE SERVICE</h1>
+
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="compte.html">Mon compte</a>
+    </nav>
+
+    <button class="logout" onclick="deconnexion()">
+        Déconnexion
+    </button>
+</header>
+
+<div class="container">
+
+    <section class="welcome">
+        <h2>Bienvenue dans Mon espace FCS</h2>
+        <p id="nom-utilisateur">
+            Votre espace personnel vous permet de gérer vos activités sur FCS.
+        </p>
+    </section>
+
+    <section class="cards">
+
+        <div class="card">
+    <h3>👤 Mon profil</h3>
+    <p>Consultez et gérez vos informations personnelles.</p>
+    <a href="profil.html" class="button">Mon profil</a>
+</div>
+
+       <div class="card">
+    <h3>📢 Mes annonces</h3>
+    <p>Consultez et gérez les produits que vous avez publiés.</p>
+
+    <a href="mes-annonces.html" class="button">
+        Voir mes annonces
+    </a>
+
+    <br><br>
+
+    <a href="publier.html" class="button">
+        Publier une annonce
+    </a>
+</div>
+
+        <div class="card">
+            <h3>📦 Mes commandes</h3>
+            <p>Suivez vos commandes et vos achats.</p>
+            <a href="mes-commandes.html" class="button">Mes commandes</a>
+        </div>
+
+        <div class="card">
+    <h3>❤️ Mes favoris</h3>
+    <p>Retrouvez les annonces que vous avez enregistrées.</p>
+    <a href="favoris.html" class="button">Mes favoris</a>
+</div>
+
+    </section>
+
+</div>
+
+<footer>
+    FOFANA COMMERCE SERVICE — Le commerce sans frontières
+</footer>
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+
+</script>
+<script>
+    const supabaseClient = window.supabase.createClient(
+        "https://ixetvhbkhboxfjlykclo.supabase.co",
+        "sb_publishable_c0KiidatgOYE_0wFk3hy2Q_sWRSsxHZ"
+    );
+
+    async function verifierConnexion() {
+        const { data: { user }, error } = await supabaseClient.auth.getUser();
+
+        if (error || !user) {
+            window.location.href = "compte.html";
+            return;
+        }
+    }
+
+    verifierConnexion();
+
+    async function deconnexion() {
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            alert("Erreur lors de la déconnexion : " + error.message);
+            return;
+        }
+
+        window.location.href = "compte.html";
+    }
+</script>
+
+
+</body>
+</html>

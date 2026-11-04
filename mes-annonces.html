@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mes annonces | FCS</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080808;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #111;
+    padding: 20px;
+    border-bottom: 1px solid #d4af37;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+header h1 {
+    color: #d4af37;
+}
+
+header a {
+    color: #d4af37;
+    text-decoration: none;
+    margin: 8px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 35px auto;
+    padding: 20px;
+}
+
+h2 {
+    color: #d4af37;
+}
+
+.annonces {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 22px;
+}
+
+.carte {
+    background: #151515;
+    border: 1px solid #8f7523;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.carte img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+}
+
+.contenu {
+    padding: 18px;
+}
+
+.contenu h3 {
+    color: #d4af37;
+}
+
+.prix {
+    color: #d4af37;
+    font-weight: bold;
+    font-size: 19px;
+}
+
+.statut {
+    color: #8fce91;
+}
+
+.message {
+    color: #ccc;
+    margin: 25px 0;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #999;
+    border-top: 1px solid #333;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>FCS</h1>
+
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="espace.html">Mon espace</a>
+        <a href="publier.html">Publier</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <h2>📢 Mes annonces</h2>
+
+    <p class="message" id="message">
+        Chargement de vos annonces...
+    </p>
+
+    <div class="annonces" id="listeAnnonces"></div>
+
+</div>
+
+<footer>
+    FOFANA COMMERCE SERVICE — Le commerce sans frontières
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase.createClient(
+    "https://ixetvhbkhboxfjlykclo.supabase.co",
+    "sb_publishable_c0KiidatgOYE_0wFk3hy2Q_sWRSsxHZ"
+);
+
+const liste = document.getElementById("listeAnnonces");
+const message = document.getElementById("message");
+
+function securiser(texte) {
+    return String(texte ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[c]);
+}
+
+async function chargerMesAnnonces() {
+
+    const { data: { user }, error: erreurConnexion } =
+        await supabaseClient.auth.getUser();
+
+    if (erreurConnexion || !user) {
+        window.location.href = "compte.html";
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("listings")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        message.textContent =
+            "Erreur de chargement : " + error.message;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        message.textContent =
+            "Vous n'avez encore publié aucune annonce.";
+        return;
+    }
+
+    message.textContent =
+        "Vous avez publié " + data.length + " annonce(s).";
+
+    liste.innerHTML = data.map(annonce => {
+
+        const photos = Array.isArray(annonce.images)
+            ? annonce.images
+            : [];
+
+        const image = photos.length > 0
+            ? `<img src="${securiser(photos[0])}" alt="Photo du produit">`
+            : `<div style="height:210px;display:flex;align-items:center;justify-content:center;color:#aaa;">Aucune photo</div>`;
+
+        return `
+            <article class="carte">
+
+                ${image}
+
+                <div class="contenu">
+
+                    <h3>${securiser(annonce.title)}</h3>
+
+                    <p>${securiser(annonce.description)}</p>
+
+                    <p class="prix">
+                        ${securiser(annonce.price)}
+                        ${securiser(annonce.currency || "XOF")}
+                    </p>
+
+                    <p>
+                        ${securiser(annonce.category)}
+                    </p>
+
+                    <p>
+                        📍 ${securiser(annonce.city)},
+                        ${securiser(annonce.country)}
+                    </p>
+
+                    <p class="statut">
+                        Statut : ${securiser(annonce.status)}
+                    </p>
+
+                    <p>
+                        📸 ${photos.length} photo(s)
+                    </p>
+<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
+
+    <a href="modifier-annonce.html?id=${encodeURIComponent(annonce.id)}"
+       style="background:#d4af37; color:#080808; padding:10px 15px; text-decoration:none; border-radius:6px; font-weight:bold;">
+        ✏️ Modifier
+    </a>
+
+    <button onclick="supprimerAnnonce('${securiser(annonce.id)}')"
+            style="background:#b22222; color:white; padding:10px 15px; border:none; border-radius:6px; cursor:pointer;">
+        🗑️ Supprimer
+    </button>
+
+</div>
+                </div>
+            </article>
+        `;
+
+    }).join("");
+}
+async function supprimerAnnonce(id) {
+
+    const confirmation = confirm(
+        "Voulez-vous vraiment supprimer cette annonce ? Cette action est définitive."
+    );
+
+    if (!confirmation) {
+        return;
+    }
+
+    const { data: { user }, error: erreurConnexion } =
+        await supabaseClient.auth.getUser();
+
+    if (erreurConnexion || !user) {
+        alert("Vous devez être connecté.");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("listings")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+    if (error) {
+        alert("Erreur lors de la suppression : " + error.message);
+        return;
+    }
+
+    alert("Annonce supprimée avec succès.");
+
+    chargerMesAnnonces();
+}
+chargerMesAnnonces();
+</script>
+
+</body>
+</html>
