@@ -312,7 +312,15 @@ if (champ.type === "password") {
 }
 
 }
+fcsSupabase.auth.onAuthStateChange((event, session) => {
+    const confirmation =
+        window.location.search.includes("code=") ||
+        window.location.hash.includes("access_token=");
 
+    if (event === "SIGNED_IN" && session && confirmation) {
+        window.location.replace("espace.html");
+    }
+});
 </script>
 
 </body>
