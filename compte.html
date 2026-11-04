@@ -204,7 +204,12 @@ const SUPABASE_KEY = "sb_publishable_c0KiidatgOYE_0wFk3hy2Q_sWRSsxHZ";
 
 const fcsSupabase = window.supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_KEY,
+    {
+        auth: {
+            detectSessionInUrl: false
+        }
+    }
 );
 
 let modeInscription = true;
@@ -312,15 +317,30 @@ if (champ.type === "password") {
 }
 
 }
-fcsSupabase.auth.onAuthStateChange((event, session) => {
-    const confirmation =
-        window.location.search.includes("code=") ||
-        window.location.hash.includes("access_token=");
+(async function traiterConfirmationEmail() {
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
 
-    if (event === "SIGNED_IN" && session && confirmation) {
-        window.location.replace("espace.html");
+    if (!code) return;
+
+    const message = document.getElementById("message");
+
+    message.className = "attente";
+    message.textContent = "Confirmation réussie. Ouverture de votre espace client...";
+
+    const { data, error } =
+        await fcsSupabase.auth.exchangeCodeForSession(code);
+
+    if (error || !data.session) {
+        message.className = "erreur";
+        message.textContent =
+            "Impossible d'ouvrir votre session. Veuillez vous connecter.";
+        return;
     }
-});
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+    window.location.replace("espace.html");
+})();
 </script>
 
 </body>
