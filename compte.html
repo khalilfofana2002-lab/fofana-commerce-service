@@ -253,15 +253,16 @@ message.textContent = "Veuillez patienter...";
 
         if (modeInscription) {
             resultat = await fcsSupabase.auth.signUp({
-                email: email,
-                password: motdepasse,
-                options: {
-                    data: {
-                        full_name: nom,
-                        phone: telephone
-                    }
-                }
-            });
+    email: email,
+    password: motdepasse,
+    options: {
+        emailRedirectTo: window.location.origin + window.location.pathname,
+        data: {
+            full_name: nom,
+            phone: telephone
+        }
+    }
+});
 
             if (!resultat.error) {
                  message.className = "succes";
