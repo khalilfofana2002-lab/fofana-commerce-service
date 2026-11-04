@@ -201,16 +201,28 @@
         "sb_publishable_c0KiidatgOYE_0wFk3hy2Q_sWRSsxHZ"
     );
 
+    document.body.style.visibility = "hidden";
+
     async function verifierConnexion() {
-        const { data: { user }, error } = await supabaseClient.auth.getUser();
+        const { data: { user }, error } =
+            await supabaseClient.auth.getUser();
 
         if (error || !user) {
-            window.location.href = "compte.html";
+            window.location.replace("compte.html");
             return;
         }
+
+        document.body.style.visibility = "visible";
     }
 
     verifierConnexion();
+
+    window.addEventListener("pageshow", function(event) {
+        if (event.persisted) {
+            document.body.style.visibility = "hidden";
+            verifierConnexion();
+        }
+    });
 
     async function deconnexion() {
         const { error } = await supabaseClient.auth.signOut();
@@ -220,10 +232,9 @@
             return;
         }
 
-        window.location.href = "compte.html";
+        window.location.replace("compte.html");
     }
 </script>
-
 
 </body>
 </html>
