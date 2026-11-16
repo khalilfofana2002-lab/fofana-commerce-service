@@ -185,7 +185,11 @@ async function chargerDetails() {
         message.textContent = "Annonce introuvable ou indisponible.";
         return;
     }
-
+  const { data: vendeur } = await supabaseClient
+    .from("profiles")
+    .select("full_name, phone")
+    .eq("id", annonce.user_id)
+    .maybeSingle();
  const telephoneVendeur = String(annonce.seller_phone || "")
     .replace(/\D/g, "");
 
