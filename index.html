@@ -133,18 +133,6 @@
             font-size: 32px;
             margin-bottom: 12px;
         }
-        .category-photo {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    display: block;
-}
-
-.category {
-    overflow: hidden;
-}
 
         .category:hover {
             transform: translateY(-3px);
@@ -388,59 +376,57 @@ margin: 0;
 <div class="categories">
 
     <div class="category" onclick="filtrer('Commerce')">
-    <img src="images/categories/commerce.jpg"
-         alt="Commerce général"
-         class="category-photo">
-    <h3>Commerce général</h3>
-</div>
+        <div class="icon">🛍️</div>
+        <h3>Commerce général</h3>
+    </div>
 
     <div class="category" onclick="filtrer('Électronique')">
-        <img src="images/categories/electronique.jpg" class="category-photo" alt="Électronique">
+        <div class="icon">📱</div>
         <h3>Électronique</h3>
     </div>
 
     <div class="category" onclick="filtrer('Véhicules')">
-        <img src="images/categories/vehicules.jpg" class="category-photo" alt="Véhicules et motos">
+        <div class="icon">🚗</div>
         <h3>Véhicules et motos</h3>
     </div>
 
     <div class="category" onclick="filtrer('Immobilier')">
-        <img src="images/categories/immobilier.jpg" class="category-photo" alt="Immobilier">
+        <div class="icon">🏠</div>
         <h3>Immobilier</h3>
     </div>
 
     <div class="category" onclick="filtrer('Mode')">
-        <img src="images/categories/mode.jpg" class="category-photo" alt="Mode et accessoires">
+        <div class="icon">👕</div>
         <h3>Mode et accessoires</h3>
     </div>
 
     <div class="category" onclick="filtrer('Maison')">
-        <img src="images/categories/maison.jpg" class="category-photo" alt="Maison et mobilier">
+        <div class="icon">🛋️</div>
         <h3>Maison et mobilier</h3>
     </div>
 
     <div class="category" onclick="filtrer('Agriculture')">
-        <img src="images/categories/agriculture.jpg" class="category-photo" alt="Agriculture et élevage">
+        <div class="icon">🌾</div>
         <h3>Agriculture et élevage</h3>
     </div>
 
     <div class="category" onclick="filtrer('Services')">
-        <img src="images/categories/services.jpg" class="category-photo" alt="Services">
+        <div class="icon">🛠️</div>
         <h3>Services</h3>
     </div>
 
     <div class="category" onclick="filtrer('Emploi')">
-        <img src="images/categories/emploi.jpg" class="category-photo" alt="Emploi">
+        <div class="icon">💼</div>
         <h3>Emploi</h3>
     </div>
 
     <div class="category" onclick="filtrer('Loisirs')">
-        <img src="images/categories/loisirs.jpg" class="category-photo" alt="Loisirs">
-        <h3>Loisirs et divertissement</h3>
+        <div class="icon">🎮</div>
+        <h3> Loisirs et divertissement</h3>
     </div>
 
     <div class="category" onclick="filtrer('International')">
-        <img src="images/categories/international.jpg" class="category-photo" alt="International">
+        <div class="icon">🌍</div>
         <h3>International</h3>
     </div>
 
