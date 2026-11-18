@@ -120,12 +120,16 @@ button {
         <input type="text" id="pays" required>
 
         <label for="telephone">Numéro WhatsApp</label>
-        <input type="tel" id="telephone" required>
+<input type="tel" id="telephone" required>
 
-        <button type="submit">
-            Enregistrer les modifications
-        </button>
+<label for="photos">Ajouter des photos (5 maximum au total)</label>
+<input type="file" id="photos" accept="image/*" multiple>
 
+<p id="messagePhotos" class="message"></p>
+
+<button type="submit">
+    Enregistrer les modifications
+</button>
     </form>
 
 </div>
@@ -146,6 +150,8 @@ const annonceId = params.get("id");
 
 let utilisateurConnecte = null;
 
+    let imagesExistantes = [];
+    
 async function chargerAnnonce() {
 
     const { data: { user }, error: erreurConnexion } =
@@ -175,7 +181,10 @@ async function chargerAnnonce() {
             "Annonce introuvable ou vous n'en êtes pas le propriétaire.";
         return;
     }
-
+   imagesExistantes = Array.isArray(annonce.images)
+    ? annonce.images
+    : [];
+    
     document.getElementById("titre").value =
         annonce.title || "";
 
@@ -202,6 +211,57 @@ async function chargerAnnonce() {
     formulaire.style.display = "block";
 }
 
+    async function ajouterNouvellesPhotos() {
+
+    const fichiers = Array.from(
+        document.getElementById("photos").files
+    );
+
+    const messagePhotos = document.getElementById("messagePhotos");
+
+    if (imagesExistantes.length + fichiers.length > 5) {
+        messagePhotos.textContent = "Maximum 5 photos au total.";
+        return null;
+    }
+
+    const nouvellesPhotos = [];
+
+    for (const fichier of fichiers) {
+
+        if (!fichier.type.startsWith("image/") ||
+            fichier.size > 5 * 1024 * 1024) {
+
+            messagePhotos.textContent =
+                "Chaque photo doit être une image de 5 Mo maximum.";
+
+            return null;
+        }
+
+        const extension = fichier.name.split(".").pop().toLowerCase();
+
+        const chemin = utilisateurConnecte.id + "/" +
+            crypto.randomUUID() + "." + extension;
+
+        const { error } = await supabaseClient.storage
+            .from("annonces")
+            .upload(chemin, fichier);
+
+        if (error) {
+            messagePhotos.textContent =
+                "Erreur photo : " + error.message;
+            return null;
+        }
+
+        const { data } = supabaseClient.storage
+            .from("annonces")
+            .getPublicUrl(chemin);
+
+        nouvellesPhotos.push(data.publicUrl);
+    }
+
+    return [...imagesExistantes, ...nouvellesPhotos];
+}
+    
 formulaire.addEventListener("submit", async function(event) {
 
     event.preventDefault();
@@ -226,7 +286,11 @@ formulaire.addEventListener("submit", async function(event) {
         alert("Veuillez remplir correctement tous les champs.");
         return;
     }
+  const imagesFinales = await ajouterNouvellesPhotos();
 
+if (imagesFinales === null) {
+    return;
+}
     message.textContent = "Enregistrement en cours...";
 
     const { error } = await supabaseClient
@@ -239,6 +303,7 @@ formulaire.addEventListener("submit", async function(event) {
             city: ville,
             country: pays,
             seller_phone: telephone
+            images: imagesFinales,
         })
         .eq("id", annonceId)
         .eq("user_id", utilisateurConnecte.id);
