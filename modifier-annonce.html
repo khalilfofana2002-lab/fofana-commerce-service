@@ -318,7 +318,10 @@ if (imagesFinales === null) {
     window.location.href = "mes-annonces.html";
 });
 
-chargerAnnonce();
+chargerAnnonce().catch((erreur) => {
+    message.textContent = "Erreur de chargement : " + erreur.message;
+    console.error(erreur);
+});
 </script>
 
 </body>
