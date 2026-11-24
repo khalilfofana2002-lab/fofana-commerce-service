@@ -201,6 +201,27 @@
     placeholder="Exemple : 10"
     required
 >
+    <label>Prix selon la quantité commandée</label>
+
+<div id="paliersPrix">
+
+    <div class="palier">
+        <input type="number" class="quantite-palier"
+               min="1" placeholder="Quantité à partir de" required>
+
+        <input type="number" class="prix-palier"
+               min="1" placeholder="Prix unitaire en FCFA" required>
+    </div>
+
+</div>
+
+<button type="button" onclick="ajouterPalier()">
+    + Ajouter un palier de prix
+</button>
+
+<small style="color:#ccc; display:block; margin-top:8px;">
+    Exemple : 1 à 9 unités : 5 000 FCFA ; 10 à 49 : 4 500 FCFA.
+</small>
 
     <label for="ville">Ville</label>
     <input
@@ -292,6 +313,21 @@
             const description = document.getElementById("description").value.trim();
             const prix = Number(document.getElementById("prix").value);
             const quantiteMin = Number(document.getElementById("quantite_min").value);
+            const priceTiers = [];
+
+document.querySelectorAll("#paliersPrix .palier").forEach(palier => {
+    const quantite = Number(palier.querySelector(".quantite-palier").value);
+    const prixPalier = Number(palier.querySelector(".prix-palier").value);
+
+    if (quantite > 0 && prixPalier > 0) {
+        priceTiers.push({
+            quantity: quantite,
+            price: prixPalier
+        });
+    }
+});
+
+priceTiers.sort((a, b) => a.quantity - b.quantity);
             const ville = document.getElementById("ville").value.trim();
             const pays = document.getElementById("pays").value.trim();
             const telephone = document.getElementById("telephone").value.trim();
@@ -363,6 +399,7 @@ const { data, error } = await supabaseClient
         description: description,
         price: prix,
         minimum_quantity: quantiteMin,
+        price_tiers: priceTiers,
         currency: "XOF",
         city: ville,
 country: pays,
@@ -393,6 +430,26 @@ if (error) {
             bouton.textContent = "Publier mon annonce";
         }
     });
+    function ajouterPalier() {
+    const conteneur = document.getElementById("paliersPrix");
+
+    const nouveauPalier = document.createElement("div");
+    nouveauPalier.className = "palier";
+
+    nouveauPalier.innerHTML = `
+        <input type="number" class="quantite-palier"
+               min="1" placeholder="Quantité à partir de" required>
+
+        <input type="number" class="prix-palier"
+               min="1" placeholder="Prix unitaire en FCFA" required>
+
+        <button type="button" onclick="this.parentElement.remove()">
+            Supprimer
+        </button>
+    `;
+
+    conteneur.appendChild(nouveauPalier);
+}
 </script>
 
 </body>
