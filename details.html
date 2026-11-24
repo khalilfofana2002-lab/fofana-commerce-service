@@ -223,6 +223,11 @@ const numeroWhatsApp = telephoneVendeur.startsWith("221")
                     ${securiser(annonce.price)}
                     ${securiser(annonce.currency || "XOF")}
                 </p>
+                <p>
+    <strong>Quantité minimale de commande :</strong>
+    ${securiser(annonce.minimum_quantity || 1)}
+    unité(s)
+</p>
 
                 <h3>Description</h3>
 
