@@ -199,6 +199,48 @@ const numeroWhatsApp = telephoneVendeur.startsWith("221")
     const photos = Array.isArray(annonce.images)
         ? annonce.images
         : [];
+    const paliers = Array.isArray(annonce.price_tiers)
+    ? annonce.price_tiers
+    : [];
+
+const tableauPrix = paliers.length > 0
+    ? `
+        <h3>Nos prix selon la quantité commandée</h3>
+
+        <table style="width:100%; border-collapse:collapse; margin:15px 0;">
+            <thead>
+                <tr style="color:#d4af37; border-bottom:1px solid #8f7523;">
+                    <th style="padding:12px; text-align:left;">Quantité</th>
+                    <th style="padding:12px; text-align:left;">Prix unitaire</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                ${paliers.map((palier, index) => {
+                    const debut = Number(palier.quantity);
+                    const suivant = paliers[index + 1];
+
+                    const quantite = suivant
+                        ? `${debut} à ${Number(suivant.quantity) - 1}`
+                        : `${debut} et plus`;
+
+                    return `
+                        <tr style="border-bottom:1px solid #333;">
+                            <td style="padding:12px;">
+                                ${quantite} unités
+                            </td>
+
+                            <td style="padding:12px; color:#d4af37;">
+                                ${securiser(palier.price)}
+                                ${securiser(annonce.currency || "FCFA")}
+                            </td>
+                        </tr>
+                    `;
+                }).join("")}
+            </tbody>
+        </table>
+    `
+    : "";
 
     const galerie = photos.length > 0
         ? photos.map(photo => `
@@ -228,6 +270,7 @@ const numeroWhatsApp = telephoneVendeur.startsWith("221")
     ${securiser(annonce.minimum_quantity || 1)}
     unité(s)
 </p>
+${tableauPrix}
 
                 <h3>Description</h3>
 
